@@ -6,6 +6,22 @@ import (
 	"os"
 )
 
+type ItemNotFoundError struct {
+	itemName string
+}
+
+func (e ItemNotFoundError) Error() string {
+	return fmt.Sprintf("List \"%s\" not found", e.itemName)
+}
+
+type ListNotFoundError struct {
+	listName string
+}
+
+func (e ListNotFoundError) Error() string {
+	return fmt.Sprintf("List \"%s\" not found", e.listName)
+}
+
 type State struct {
 	lists        ListMap
 	selectedList string
@@ -21,7 +37,7 @@ func (s *State) SetSelected(listName string) error {
 		return nil
 	}
 
-	return fmt.Errorf("Not in the list")
+	return ListNotFoundError{listName}
 }
 
 func (s State) GetListKeys() []string {
@@ -44,15 +60,44 @@ func (s *State) AddList(listName string) error {
 	return nil
 }
 
-func (s *State) AddItemToList(listName, itemName string) error {
-	if _, ok := s.lists[listName]; !ok {
-		return fmt.Errorf("List \"%s\" does not exist", listName)
+func (s *State) listExists(listName string) bool {
+	_, ok := s.lists[listName]
+
+	return ok
+}
+
+func (s *State) RemoveList(listName string) error {
+	if s.listExists(listName) {
+		delete(s.lists, listName)
+		return nil
 	}
 
-	item := NewItem(itemName)
-	s.lists[listName] = append(s.lists[listName], item)
+	return ListNotFoundError{listName}
+}
 
-	return nil
+func (s *State) AddItemToList(listName, itemName string) error {
+	if s.listExists(listName) {
+		item := NewItem(itemName)
+		s.lists[listName] = append(s.lists[listName], item)
+		return nil
+	}
+
+	return ListNotFoundError{listName}
+}
+
+func (s *State) RemoveItemFromList(listName, itemName string) error {
+	if !s.listExists(listName) {
+		return ListNotFoundError{listName}
+	}
+
+	for i, v := range s.lists[listName] {
+		if v.Name == itemName {
+			s.lists[listName] = append(s.lists[listName][:i], s.lists[listName][i+1:]...)
+			return nil
+		}
+	}
+
+	return ItemNotFoundError{itemName}
 }
 
 func (state *State) SaveToFile(path string) error {

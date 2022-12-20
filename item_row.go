@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	dt_format = "January 01 2006"
+	dt_format string = "January 01 2006"
 )
 
 func NewItemRow(i Item) (*gtk.ListBoxRow, error) {

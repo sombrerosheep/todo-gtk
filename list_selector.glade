@@ -26,5 +26,32 @@
         <property name="position">0</property>
       </packing>
     </child>
+    <child>
+      <object class="GtkButton" id="delete_list_btn">
+        <property name="label" translatable="yes">🗑</property>
+        <property name="name">ItemDeleteButton</property>
+        <property name="width-request">50</property>
+        <property name="visible">True</property>
+        <property name="can-focus">True</property>
+        <property name="receives-default">True</property>
+        <property name="halign">center</property>
+        <property name="valign">center</property>
+        <property name="margin-left">10</property>
+        <property name="margin-right">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin-end">10</property>
+        <property name="margin-top">10</property>
+        <property name="margin-bottom">10</property>
+        <property name="hexpand">False</property>
+        <property name="vexpand">False</property>
+        <property name="image-position">right</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="pack-type">end</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
   </object>
 </interface>

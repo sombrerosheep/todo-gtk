@@ -53,7 +53,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkButton">
+      <object class="GtkButton" id="delete_item_btn">
         <property name="label" translatable="yes">🗑</property>
         <property name="name">ItemDeleteButton</property>
         <property name="width-request">50</property>
