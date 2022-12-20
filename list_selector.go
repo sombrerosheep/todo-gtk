@@ -1,10 +1,25 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func NewListSelector(name string) (*gtk.ListBoxRow, error) {
+func getOnDeleteListClick(state *State, listName string, listBox *gtk.ListBox) WidgetCallback {
+	return func() {
+		// remove from state
+		err := state.RemoveList(listName)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		RefreshLists(state.GetListKeys(), listBox)
+	}
+}
+
+func NewListSelector(name string, parent *gtk.ListBox) (*gtk.ListBoxRow, error) {
 	row, err := gtk.ListBoxRowNew()
 	if err != nil {
 		return nil, err
@@ -19,6 +34,13 @@ func NewListSelector(name string) (*gtk.ListBoxRow, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	btn, err := GetButton(template, "delete_list_btn")
+	if err != nil {
+		return nil, err
+	}
+
+	btn.Connect("clicked", getOnDeleteListClick(state, name, parent))
 
 	root, err := GetBox(template, "root_box")
 	if err != nil {

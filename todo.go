@@ -6,12 +6,58 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
+func RefreshLists(lists []string, lb *gtk.ListBox) error {
+	lb.GetChildren().Foreach(func(o interface{}) {
+		if w, ok := o.(gtk.IWidget); ok {
+			lb.Remove(w)
+		} else {
+			log.Println("could not cast child to widget")
+		}
+	})
+
+	for _, name := range lists {
+		row, err := NewListSelector(name, lb)
+		if err != nil {
+			return err
+		}
+
+		log.Printf("inserting (%s)\n", name)
+		lb.Insert(row, -1)
+	}
+
+	lb.ShowAll()
+	return nil
+}
+
+func RefreshItems(items []Item, lb *gtk.ListBox) error {
+	lb.GetChildren().Foreach(func(o interface{}) {
+		if w, ok := o.(gtk.IWidget); ok {
+			lb.Remove(w)
+		} else {
+			log.Println("could not cast child to widget")
+		}
+	})
+
+	for _, item := range items {
+		// create the row from item.glade
+		row, err := NewItemRow(item)
+		if err != nil {
+			return err
+		}
+		// insert each row
+		lb.Insert(row, -1)
+	}
+
+	lb.ShowAll()
+	return nil
+}
+
 func getOnNewListClick(list *gtk.ListBox) WidgetCallback {
 	return func() {
 		fn := func(n NewThingData) {
 			state.AddList(n.Name)
 
-			row, err := NewListSelector(n.Name)
+			row, err := NewListSelector(n.Name, list)
 			if err != nil {
 				log.Printf("error making selector for list \"%s\": %s\n", n.Name, err)
 				return
@@ -61,29 +107,6 @@ func getOnNewItemClick(list *gtk.ListBox) WidgetCallback {
 	}
 }
 
-func apply_new_list(items []Item, lb *gtk.ListBox) error {
-	lb.GetChildren().Foreach(func(o interface{}) {
-		if w, ok := o.(gtk.IWidget); ok {
-			lb.Remove(w)
-		} else {
-			log.Println("could not cast child to widget")
-		}
-	})
-
-	for _, item := range items {
-		// create the row from item.glade
-		row, err := NewItemRow(item)
-		if err != nil {
-			return err
-		}
-		// insert each row
-		lb.Insert(row, -1)
-	}
-
-	lb.ShowAll()
-	return nil
-}
-
 func NewTodoWindow() (*gtk.Window, error) {
 	builder, err := gtk.BuilderNewFromFile("todo.glade")
 	if err != nil {
@@ -109,13 +132,9 @@ func NewTodoWindow() (*gtk.Window, error) {
 		return nil, err
 	}
 
-	for _, name := range state.GetListKeys() {
-		row, err := NewListSelector(name)
-		if err != nil {
-			return nil, err
-		}
-
-		listsListBox.Insert(row, -1)
+	err = RefreshLists(state.GetListKeys(), listsListBox)
+	if err != nil {
+		log.Println(err)
 	}
 
 	// Begin populate selected list items
@@ -161,7 +180,7 @@ func NewTodoWindow() (*gtk.Window, error) {
 			return
 		}
 
-		err = apply_new_list(state.lists[selected], lb)
+		err = RefreshItems(state.lists[selected], lb)
 		if err != nil {
 			log.Printf("error applying list: %s\n", err)
 			return
