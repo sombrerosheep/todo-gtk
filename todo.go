@@ -29,7 +29,7 @@ func RefreshLists(lists []string, lb *gtk.ListBox) error {
 	return nil
 }
 
-func RefreshItems(items []Item, lb *gtk.ListBox) error {
+func RefreshItems(listName string, items []Item, lb *gtk.ListBox) error {
 	lb.GetChildren().Foreach(func(o interface{}) {
 		if w, ok := o.(gtk.IWidget); ok {
 			lb.Remove(w)
@@ -40,7 +40,7 @@ func RefreshItems(items []Item, lb *gtk.ListBox) error {
 
 	for _, item := range items {
 		// create the row from item.glade
-		row, err := NewItemRow(item)
+		row, err := NewItemRow(item, listName, lb)
 		if err != nil {
 			return err
 		}
@@ -86,7 +86,7 @@ func getOnNewItemClick(list *gtk.ListBox) WidgetCallback {
 			state.AddItemToList(listName, n.Name)
 
 			item := NewItem(n.Name)
-			row, err := NewItemRow(item)
+			row, err := NewItemRow(item, listName, list)
 			if err != nil {
 				log.Printf("error making selector for list \"%s\": %s\n", n.Name, err)
 				return
@@ -180,7 +180,7 @@ func NewTodoWindow() (*gtk.Window, error) {
 			return
 		}
 
-		err = RefreshItems(state.lists[selected], lb)
+		err = RefreshItems(selected, state.lists[selected], lb)
 		if err != nil {
 			log.Printf("error applying list: %s\n", err)
 			return
@@ -198,6 +198,11 @@ func NewTodoWindow() (*gtk.Window, error) {
 		return nil, err
 	}
 	newItemBtn.Connect("clicked", getOnNewItemClick(lb))
+
+	err = RefreshItems(state.GetSelected(), state.lists[state.GetSelected()], lb)
+	if err != nil {
+		return nil, err
+	}
 
 	return win, nil
 }

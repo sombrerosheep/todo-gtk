@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gotk3/gotk3/gtk"
 )
 
@@ -8,7 +10,19 @@ const (
 	dt_format string = "January 01 2006"
 )
 
-func NewItemRow(i Item) (*gtk.ListBoxRow, error) {
+func getOnDeleteItemClick(state *State, listName, itemName string, listBox *gtk.ListBox) WidgetCallback {
+	return func() {
+		err := state.RemoveItemFromList(listName, itemName)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		RefreshItems(listName, state.lists[listName], listBox)
+	}
+}
+
+func NewItemRow(i Item, listName string, parent *gtk.ListBox) (*gtk.ListBoxRow, error) {
 	template, err := gtk.BuilderNewFromFile("./item_row.glade")
 	if err != nil {
 		return nil, err
@@ -42,16 +56,19 @@ func NewItemRow(i Item) (*gtk.ListBoxRow, error) {
 		check.SetLabel(i.Completed.Format(dt_format))
 	}
 
+	btn, err := GetButton(template, "delete_item_btn")
+	if err != nil {
+		return nil, err
+	}
+
+	btn.Connect("clicked", getOnDeleteItemClick(state, listName, i.Name, parent))
+
 	row, err := gtk.ListBoxRowNew()
 	if err != nil {
 		return nil, err
 	}
 
-	root, err := template.GetObject("root")
-	if err != nil {
-		return nil, err
-	}
-	b, err := IsBox(root)
+	b, err := GetBox(template, "root")
 	if err != nil {
 		return nil, err
 	}
