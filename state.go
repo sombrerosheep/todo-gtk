@@ -140,7 +140,7 @@ func (state *State) SaveToFile(path string) error {
 func NewStateFromFile(path string) (*State, error) {
 	var state = &State{}
 
-	loaded, err := NewListMapFromFile(listPath)
+	loaded, err := NewListMapFromFile(path)
 	if err != nil {
 		return state, err
 	}
