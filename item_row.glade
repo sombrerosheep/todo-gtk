@@ -38,7 +38,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkCheckButton" id="complete">
+      <object class="GtkCheckButton" id="complete_item_btn">
         <property name="label" translatable="yes">checkbutton</property>
         <property name="visible">True</property>
         <property name="can-focus">True</property>

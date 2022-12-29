@@ -72,6 +72,15 @@ func GetListBox(template *gtk.Builder, id string) (*gtk.ListBox, error) {
 	return IsListBox(o)
 }
 
+func GetCheckButton(template *gtk.Builder, id string) (*gtk.CheckButton, error) {
+	o, err := template.GetObject(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return IsCheckButton(o)
+}
+
 func IsLabel(o interface{}) (*gtk.Label, error) {
 	if l, ok := o.(*gtk.Label); ok {
 		return l, nil

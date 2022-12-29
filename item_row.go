@@ -7,12 +7,25 @@ import (
 )
 
 const (
-	dt_format string = "January 01 2006"
+	dt_format string = "January 2, 2006"
+	//dt_format string = time.RFC850
 )
 
 func getOnDeleteItemClick(state *State, listName, itemName string, listBox *gtk.ListBox) WidgetCallback {
 	return func() {
 		err := state.RemoveItemFromList(listName, itemName)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		RefreshItems(listName, state.lists[listName], listBox)
+	}
+}
+
+func getOnItemComplete(state *State, listName, itemName string, listBox *gtk.ListBox) WidgetCallback {
+	return func() {
+		err := state.MarkItemComplete(listName, itemName)
 		if err != nil {
 			log.Println(err)
 			return
@@ -38,22 +51,19 @@ func NewItemRow(i Item, listName string, parent *gtk.ListBox) (*gtk.ListBoxRow, 
 		return nil, err
 	}
 
-	o, err := template.GetObject("complete")
-	if err != nil {
-		return nil, err
-	}
-
-	check, err := IsCheckButton(o)
+	check, err := GetCheckButton(template, "complete_item_btn")
 	if err != nil {
 		return nil, err
 	}
 
 	if i.Completed.IsZero() {
 		// Incomplete item
+		check.Connect("clicked", getOnItemComplete(state, listName, i.Name, parent))
 		check.SetLabel("Completed?")
 	} else {
 		// Complete item
 		check.SetLabel(i.Completed.Format(dt_format))
+		check.SetSensitive(false)
 	}
 
 	btn, err := GetButton(template, "delete_item_btn")

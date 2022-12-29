@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 )
 
 type ItemNotFoundError struct {
@@ -83,6 +84,22 @@ func (s *State) AddItemToList(listName, itemName string) error {
 	}
 
 	return ListNotFoundError{listName}
+}
+
+func (s *State) MarkItemComplete(listName, itemName string) error {
+	if !s.listExists(listName) {
+		return ListNotFoundError{listName}
+	}
+
+	for i := range s.lists[listName] {
+		item := &s.lists[listName][i]
+		if item.Name == itemName {
+			item.Completed = time.Now()
+			return nil
+		}
+	}
+
+	return ItemNotFoundError{itemName}
 }
 
 func (s *State) RemoveItemFromList(listName, itemName string) error {
