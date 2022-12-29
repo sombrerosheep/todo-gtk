@@ -145,6 +145,10 @@ func NewTodoWindow() (*gtk.Window, error) {
 
 	listsListBox.Connect("selected-rows-changed", func(listBox *gtk.ListBox) {
 		row := listBox.GetSelectedRow()
+		if row == nil {
+			log.Println("selected rows changed but selected is nil")
+			return
+		}
 
 		wid, err := row.GetChild()
 		if err != nil {

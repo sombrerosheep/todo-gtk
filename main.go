@@ -19,6 +19,10 @@ func newThingCallbackNoOp(_ NewThingData) {}
 
 type WidgetCallback func()
 
+var WidgetCallbackNoOp = func() {
+	log.Println("I'm a no op")
+}
+
 func onAppShutdown() {
 	log.Println("onAppShutdown")
 

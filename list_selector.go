@@ -7,6 +7,11 @@ import (
 )
 
 func getOnDeleteListClick(state *State, listName string, listBox *gtk.ListBox) WidgetCallback {
+	if listBox == nil {
+		log.Printf("error creating list delete handler (%s). listbox  was nil\n", listName)
+		return WidgetCallbackNoOp
+	}
+
 	return func() {
 		// remove from state
 		err := state.RemoveList(listName)
